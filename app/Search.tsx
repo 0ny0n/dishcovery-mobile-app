@@ -1,10 +1,12 @@
+import { Feather } from '@expo/vector-icons';
 import axios from 'axios';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { ActivityIndicator, FlatList, Image, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { IconButton } from 'react-native-paper';
+import BottomTabBar from '../components/BottomTabBar';
 
-type RecipeResult = { id: number; title: string };
+type RecipeResult = { id: string | number; title: string; image?: any };
 
 const categories = ['Breakfast', 'Lunch', 'Dinner', 'Snack'];
 const popularRecipes = [
@@ -53,91 +55,148 @@ export default function Search() {
   };
 
   return (
-    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-      {/* Header */}
-      <View style={styles.headerRow}>
-        <IconButton icon="arrow-left" size={24} onPress={() => router.back()} />
-        <Text style={styles.headerTitle}>Search</Text>
-        <View style={{ width: 40 }} />
-      </View>
-      {/* Search Bar */}
-      <View style={styles.searchBarContainer}>
-        <TextInput
-          style={styles.searchBar}
-          placeholder="Search"
-          value={search}
-          onChangeText={setSearch}
-          onSubmitEditing={handleSearchSubmit}
-          returnKeyType="search"
-        />
-      </View>
-      {/* Categories */}
-      <View style={styles.categoryRow}>
-        {categories.map((cat) => (
-          <TouchableOpacity
-            key={cat}
-            style={[styles.categoryButton, selectedCategory === cat && styles.categoryButtonActive]}
-            onPress={() => setSelectedCategory(cat)}
-          >
-            <Text style={[styles.categoryText, selectedCategory === cat && styles.categoryTextActive]}>{cat}</Text>
-          </TouchableOpacity>
-        ))}
-      </View>
-      {/* Popular Recipes or Search Results */}
-      <View style={styles.sectionRow}>
-        <Text style={styles.sectionTitle}>Popular Recipes</Text>
-        <TouchableOpacity><Text style={styles.viewAll}>View All</Text></TouchableOpacity>
-      </View>
-      {loading ? (
-        <ActivityIndicator size="large" color="#20515a" style={{ marginVertical: 20 }} />
-      ) : error ? (
-        <Text style={{ color: 'red', marginVertical: 20 }}>{error}</Text>
-      ) : results.length > 0 ? (
+    <View style={{ flex: 1, backgroundColor: '#fff' }}>
+      <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 140 }} showsVerticalScrollIndicator={true}>
+        {/* Header */}
+        <View style={[styles.headerRow, { marginBottom: 18 }]}>
+          <IconButton icon="arrow-left" size={24} onPress={() => router.replace('/HomePage')} />
+          <Text style={styles.headerTitle}>Search</Text>
+          <View style={{ width: 40 }} />
+        </View>
+        {/* Search Bar */}
+        <View style={[styles.searchBarContainer, { marginBottom: 18 }]}>
+          <View style={styles.searchBarWrapper}>
+            <Feather name="search" size={20} color="#b0b0b0" style={styles.searchIcon} />
+            <TextInput
+              style={styles.searchBar}
+              placeholder="Search"
+              value={search}
+              onChangeText={setSearch}
+              onSubmitEditing={handleSearchSubmit}
+              returnKeyType="search"
+              placeholderTextColor="#b0b0b0"
+            />
+          </View>
+        </View>
+        {/* Categories */}
+        <View style={[styles.categoryRow, { marginBottom: 16 }]}>
+          {categories.map((cat) => (
+            <TouchableOpacity
+              key={cat}
+              style={[styles.categoryButton, selectedCategory === cat && styles.categoryButtonActive, { marginRight: 16 }]}
+              onPress={() => setSelectedCategory(cat)}
+            >
+              <Text style={[styles.categoryText, selectedCategory === cat && styles.categoryTextActive]}>{cat}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+        {/* Trending Ingredients */}
+        <Text style={[styles.sectionTitle, { marginBottom: 8 }]}>Trending Ingredients</Text>
         <FlatList
-          data={results}
+          data={[
+            { id: '1', name: 'Avocado', image: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=80&q=80' },
+            { id: '2', name: 'Egg', image: 'https://images.unsplash.com/photo-1464306076886-debca5e8a6b0?auto=format&fit=crop&w=80&q=80' },
+            { id: '3', name: 'Chicken', image: 'https://images.unsplash.com/photo-1502741338009-cac2772e18bc?auto=format&fit=crop&w=80&q=80' },
+            { id: '4', name: 'Salmon', image: 'https://images.unsplash.com/photo-1519864600265-abb23847ef2c?auto=format&fit=crop&w=80&q=80' },
+          ]}
           horizontal
           showsHorizontalScrollIndicator={false}
-          keyExtractor={item => item.id.toString()}
-          renderItem={({ item }) => (
-            <View style={styles.popularCard}>
-              <Image source={{ uri: `https://spoonacular.com/recipeImages/${item.id}-312x231.jpg` }} style={styles.popularImage} />
-              <Text style={styles.popularCardTitle}>{item.title}</Text>
+          keyExtractor={item => item.id}
+          renderItem={({ item, index }) => (
+            <View style={[styles.ingredientCard, index === 3 && { marginBottom: 24 }]}>
+              <Image source={{ uri: item.image }} style={styles.ingredientImage} />
+              <Text style={styles.ingredientName}>{item.name}</Text>
             </View>
           )}
-          contentContainerStyle={{ paddingLeft: 8, paddingRight: 8 }}
+          contentContainerStyle={{ paddingLeft: 16, paddingRight: 40, paddingBottom: 24 }}
+          ItemSeparatorComponent={() => <View style={{ width: 16 }} />}
+          style={{ marginBottom: 24 }}
         />
-      ) : (
+        {/* Popular Recipes or Search Results */}
+        <View style={[styles.sectionRow, { marginBottom: 8 }]}>
+          <Text style={styles.sectionTitle}>Popular Recipes</Text>
+          <TouchableOpacity><Text style={styles.viewAll}>View All</Text></TouchableOpacity>
+        </View>
+        {loading ? (
+          <ActivityIndicator size="large" color="#20515a" style={{ marginVertical: 20 }} />
+        ) : error ? (
+          <Text style={{ color: 'red', marginVertical: 20 }}>{error}</Text>
+        ) : results.length > 0 ? (
+          <FlatList
+            data={results}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            keyExtractor={item => item.id.toString()}
+            renderItem={({ item, index }) => (
+              <View style={[styles.popularCard, index === results.length - 1 && { marginBottom: 24 }]}>
+                <Image source={{ uri: `https://spoonacular.com/recipeImages/${item.id}-312x231.jpg` }} style={styles.popularImage} />
+                <Text style={styles.popularCardTitle}>{item.title}</Text>
+              </View>
+            )}
+            contentContainerStyle={{ paddingLeft: 16, paddingRight: 40, paddingBottom: 24 }}
+            ItemSeparatorComponent={() => <View style={{ width: 16 }} />}
+            style={{ marginBottom: 24 }}
+          />
+        ) : (
+          <FlatList
+            data={popularRecipes as RecipeResult[]}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            keyExtractor={item => item.id.toString()}
+            renderItem={({ item, index }) => (
+              <View style={[styles.popularCard, index === popularRecipes.length - 1 && { marginBottom: 24 }]}>
+                <Image source={item.image} style={styles.popularImage} />
+                <Text style={styles.popularCardTitle}>{item.title}</Text>
+              </View>
+            )}
+            contentContainerStyle={{ paddingLeft: 16, paddingRight: 40, paddingBottom: 24 }}
+            ItemSeparatorComponent={() => <View style={{ width: 16 }} />}
+            style={{ marginBottom: 24 }}
+          />
+        )}
+        {/* Your Choice */}
+        <View style={[styles.sectionRow, { marginBottom: 8 }]}>
+          <Text style={styles.sectionTitle}>Your Choice</Text>
+          <TouchableOpacity><Text style={styles.viewAll}>View All</Text></TouchableOpacity>
+        </View>
+        {yourChoice.map((item, idx) => (
+          <View key={item.id} style={[styles.choiceCard, idx !== 0 && { marginTop: 16 }]}>
+            <Image source={item.image} style={styles.choiceImage} />
+            <View style={{ flex: 1, marginLeft: 12 }}>
+              <Text style={styles.choiceTitle}>{item.title}</Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 4 }}>
+                <Image source={{ uri: item.authorImg }} style={styles.authorImg} />
+                <Text style={styles.authorName}>{item.author}</Text>
+              </View>
+            </View>
+            <TouchableOpacity style={styles.arrowBtn}>
+              <IconButton icon="arrow-right" size={20} style={{ margin: 0 }} />
+            </TouchableOpacity>
+          </View>
+        ))}
+        {/* Recently Viewed */}
+        <Text style={[styles.sectionTitle, { marginBottom: 8, marginTop: 24 }]}>Recently Viewed</Text>
         <FlatList
-          data={[] as RecipeResult[]}
+          data={[
+            { id: '1', title: 'Spaghetti Carbonara', image: { uri: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=120&q=80' } },
+            { id: '2', title: 'Avocado Toast', image: { uri: 'https://images.unsplash.com/photo-1464306076886-debca5e8a6b0?auto=format&fit=crop&w=120&q=80' } },
+          ]}
           horizontal
           showsHorizontalScrollIndicator={false}
-          keyExtractor={(_, idx) => idx.toString()}
-          renderItem={null}
-          contentContainerStyle={{ paddingLeft: 8, paddingRight: 8 }}
-        />
-      )}
-      {/* Your Choice */}
-      <View style={styles.sectionRow}>
-        <Text style={styles.sectionTitle}>Your Choice</Text>
-        <TouchableOpacity><Text style={styles.viewAll}>View All</Text></TouchableOpacity>
-      </View>
-      {yourChoice.map(item => (
-        <View key={item.id} style={styles.choiceCard}>
-          <Image source={item.image} style={styles.choiceImage} />
-          <View style={{ flex: 1, marginLeft: 12 }}>
-            <Text style={styles.choiceTitle}>{item.title}</Text>
-            <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 4 }}>
-              <Image source={{ uri: item.authorImg }} style={styles.authorImg} />
-              <Text style={styles.authorName}>{item.author}</Text>
+          keyExtractor={item => item.id}
+          renderItem={({ item, index }) => (
+            <View style={[styles.recentCard, index === 1 && { marginBottom: 24 }]}>
+              <Image source={item.image} style={styles.recentImage} />
+              <Text style={styles.recentTitle}>{item.title}</Text>
             </View>
-          </View>
-          <TouchableOpacity style={styles.arrowBtn}>
-            <IconButton icon="arrow-right" size={20} style={{ margin: 0 }} />
-          </TouchableOpacity>
-        </View>
-      ))}
-      <View style={{ height: 80 }} />
-    </ScrollView>
+          )}
+          contentContainerStyle={{ paddingLeft: 16, paddingRight: 40, paddingBottom: 24 }}
+          ItemSeparatorComponent={() => <View style={{ width: 16 }} />}
+          style={{ marginBottom: 24 }}
+        />
+      </ScrollView>
+      <BottomTabBar />
+    </View>
   );
 }
 
@@ -162,14 +221,28 @@ const styles = StyleSheet.create({
   searchBarContainer: {
     marginBottom: 16,
   },
-  searchBar: {
+  searchBarWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
     backgroundColor: '#f3f7f8',
     borderRadius: 16,
-    paddingHorizontal: 16,
-    paddingVertical: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.06,
+    shadowRadius: 2,
+  },
+  searchIcon: {
+    marginRight: 8,
+  },
+  searchBar: {
+    flex: 1,
+    backgroundColor: 'transparent',
     fontSize: 16,
-    borderWidth: 1,
-    borderColor: '#e0e0e0',
+    paddingVertical: 6,
+    color: '#222',
   },
   categoryRow: {
     flexDirection: 'row',
@@ -214,11 +287,11 @@ const styles = StyleSheet.create({
     marginLeft: 8,
   },
   popularCard: {
-    width: 90,
-    height: 110,
+    width: 110,
+    height: 140,
     borderRadius: 16,
     backgroundColor: '#fff',
-    marginRight: 12,
+    marginRight: 0,
     alignItems: 'center',
     justifyContent: 'center',
     shadowColor: '#000',
@@ -226,16 +299,16 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.08,
     shadowRadius: 4,
     elevation: 2,
-    padding: 4,
+    padding: 8,
   },
   popularImage: {
-    width: 70,
-    height: 70,
+    width: 80,
+    height: 80,
     borderRadius: 12,
-    marginBottom: 6,
+    marginBottom: 8,
   },
   popularCardTitle: {
-    fontSize: 13,
+    fontSize: 14,
     fontWeight: 'bold',
     color: '#1a2b3b',
     textAlign: 'center',
@@ -252,6 +325,8 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.04,
     shadowRadius: 2,
     elevation: 1,
+    marginTop: 0,
+    minHeight: 80,
   },
   choiceImage: {
     width: 60,
@@ -279,5 +354,59 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     marginLeft: 8,
     elevation: 2,
+  },
+  ingredientCard: {
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    padding: 10,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.06,
+    shadowRadius: 2,
+    width: 80,
+    height: 100,
+    marginBottom: 0,
+    justifyContent: 'center',
+  },
+  ingredientImage: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    marginBottom: 6,
+  },
+  ingredientName: {
+    fontSize: 13,
+    color: '#20515a',
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
+  recentCard: {
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    padding: 10,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.06,
+    shadowRadius: 2,
+    width: 110,
+    height: 140,
+    marginBottom: 0,
+    justifyContent: 'center',
+  },
+  recentImage: {
+    width: 80,
+    height: 80,
+    borderRadius: 12,
+    marginBottom: 8,
+  },
+  recentTitle: {
+    fontSize: 14,
+    color: '#20515a',
+    fontWeight: 'bold',
+    textAlign: 'center',
   },
 }); 

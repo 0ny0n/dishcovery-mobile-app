@@ -2,6 +2,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { Dimensions, FlatList, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { IconButton } from 'react-native-paper';
+import BottomTabBar from '../components/BottomTabBar';
 
 const { width } = Dimensions.get('window');
 
@@ -60,95 +61,134 @@ export default function HomePage() {
   };
 
   return (
-    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-      {/* Header */}
-      <View style={styles.headerRow}>
-        <IconButton icon="magnify" size={28} style={styles.heartIcon} onPress={() => router.push('./Search')} />
-        <View>
-          <Text style={styles.greeting}>{getGreeting()}</Text>
-          <Text style={styles.username}>{username}</Text>
+    <View style={{ flex: 1, backgroundColor: '#f9faf7' }}>
+      <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 140 }} showsVerticalScrollIndicator={true}>
+        {/* Welcome Banner */}
+        <View style={styles.banner}>
+          <Text style={styles.bannerText}>Welcome to Dishcovery!</Text>
+          <Text style={styles.bannerSubText}>Discover, cook, and enjoy delicious recipes every day.</Text>
         </View>
-        <IconButton icon="heart-outline" size={28} style={styles.heartIcon} />
-      </View>
-
-      {/* Featured */}
-      <Text style={styles.sectionTitle}>Featured</Text>
-      <FlatList
-        data={featuredData}
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <View style={styles.featuredCard}>
-            <Image source={item.image} style={styles.featuredImage} resizeMode="cover" />
-            <View style={styles.featuredOverlay}>
-              <Text style={styles.featuredTitle}>{item.title}</Text>
-              <View style={styles.featuredInfoRow}>
-                <Text style={styles.featuredAuthor}>{item.author}</Text>
-                <Text style={styles.featuredTime}>{item.time}</Text>
+        {/* Header */}
+        <View style={[styles.headerRow, { marginBottom: 18 }]}>
+          <View>
+            <Text style={styles.greeting}>{getGreeting()}</Text>
+            <Text style={styles.username}>{username}</Text>
+          </View>
+          <IconButton icon="heart-outline" size={28} style={styles.heartIcon} />
+        </View>
+        {/* Featured Chefs */}
+        <Text style={[styles.sectionTitle, { marginBottom: 8 }]}>Featured Chefs</Text>
+        <FlatList
+          data={[
+            { id: '1', name: 'Chef Anna', avatar: 'https://randomuser.me/api/portraits/women/44.jpg' },
+            { id: '2', name: 'Chef Ben', avatar: 'https://randomuser.me/api/portraits/men/32.jpg' },
+            { id: '3', name: 'Chef Clara', avatar: 'https://randomuser.me/api/portraits/women/65.jpg' },
+            { id: '4', name: 'Chef David', avatar: 'https://randomuser.me/api/portraits/men/76.jpg' },
+          ]}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          keyExtractor={item => item.id}
+          renderItem={({ item }) => (
+            <View style={styles.chefCard}>
+              <Image source={{ uri: item.avatar }} style={styles.chefAvatar} />
+              <Text style={styles.chefName}>{item.name}</Text>
+            </View>
+          )}
+          contentContainerStyle={{ paddingLeft: 16, paddingRight: 40 }}
+          ItemSeparatorComponent={() => <View style={{ width: 16 }} />}
+          style={{ marginBottom: 24 }}
+        />
+        {/* Featured */}
+        <Text style={[styles.sectionTitle, { marginBottom: 8 }]}>Featured</Text>
+        <FlatList
+          data={featuredData}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item, index }) => (
+            <View style={[styles.featuredCard, index === featuredData.length - 1 && { marginBottom: 24 }]}>
+              <Image source={item.image} style={styles.featuredImage} resizeMode="cover" />
+              <View style={styles.featuredOverlay}>
+                <Text style={styles.featuredTitle}>{item.title}</Text>
+                <View style={styles.featuredInfoRow}>
+                  <Text style={styles.featuredAuthor}>{item.author}</Text>
+                  <Text style={styles.featuredTime}>{item.time}</Text>
+                </View>
               </View>
             </View>
-          </View>
-        )}
-        contentContainerStyle={{ paddingRight: 16 }}
-      />
+          )}
+          contentContainerStyle={{ paddingRight: 16, paddingBottom: 24 }}
+        />
 
-      {/* Category */}
-      <View style={styles.categoryRow}>
-        <Text style={styles.sectionTitle}>Category</Text>
-        <TouchableOpacity>
-          <Text style={styles.seeAll}>See All</Text>
-        </TouchableOpacity>
-      </View>
-      <FlatList
-        data={categories}
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        keyExtractor={(item) => item}
-        contentContainerStyle={styles.categoryList}
-        renderItem={({ item }) => (
-          <TouchableOpacity
-            style={[styles.categoryButton, selectedCategory === item && styles.categoryButtonActive]}
-            onPress={() => setSelectedCategory(item)}
-          >
-            <Text style={[styles.categoryText, selectedCategory === item && styles.categoryTextActive]}>{item}</Text>
+        {/* Category */}
+        <View style={[styles.categoryRow, { marginBottom: 12, marginTop: 18 }]}>
+          <Text style={styles.sectionTitle}>Category</Text>
+          <TouchableOpacity>
+            <Text style={styles.seeAll}>See All</Text>
           </TouchableOpacity>
-        )}
-      />
-
-      {/* Popular Recipes */}
-      <View style={styles.categoryRow}>
-        <Text style={styles.sectionTitle}>Popular Recipes</Text>
-        <TouchableOpacity>
-          <Text style={styles.seeAll}>See All</Text>
-        </TouchableOpacity>
-      </View>
-      <View style={styles.popularList}>
-        {popularRecipes.map((item) => (
-          <View key={item.id} style={styles.recipeCard}>
-            <Image source={item.image} style={styles.recipeImage} resizeMode="cover" />
+        </View>
+        <FlatList
+          data={categories}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          keyExtractor={(item) => item}
+          contentContainerStyle={[styles.categoryList, { paddingVertical: 8, paddingLeft: 16, paddingRight: 40 }]}
+          renderItem={({ item }) => (
             <TouchableOpacity
-              style={styles.favoriteButton}
-              onPress={() => toggleFavorite(item.id)}
+              style={[styles.categoryButton, selectedCategory === item && styles.categoryButtonActive, { marginRight: 16 }]}
+              onPress={() => setSelectedCategory(item)}
             >
-              <IconButton
-                icon={favorites[item.id] ? 'heart' : 'heart-outline'}
-                iconColor={favorites[item.id] ? '#e74c3c' : '#20515a'}
-                size={20}
-                style={{ margin: 0 }}
-              />
+              <Text style={[styles.categoryText, selectedCategory === item && styles.categoryTextActive]}>{item}</Text>
             </TouchableOpacity>
-            <Text style={styles.recipeTitle}>{item.title}</Text>
-            <View style={styles.recipeInfoRow}>
-              <Text style={styles.recipeInfo}>🍽 {item.kcal} Kcal</Text>
-              <Text style={styles.recipeInfo}>⏱ {item.time}</Text>
+          )}
+          style={{ marginBottom: 24 }}
+        />
+
+        {/* Popular Recipes */}
+        <View style={[styles.categoryRow, { marginBottom: 12, marginTop: 18 }]}>
+          <Text style={styles.sectionTitle}>Popular Recipes</Text>
+          <TouchableOpacity>
+            <Text style={styles.seeAll}>See All</Text>
+          </TouchableOpacity>
+        </View>
+        <View style={[styles.popularList, { marginBottom: 24 }]}>
+          {popularRecipes.map((item, idx) => (
+            <View key={item.id} style={[styles.recipeCard, idx !== 0 && { marginLeft: 16 }, idx === popularRecipes.length - 1 && { marginBottom: 32 }]}>
+              <Image source={item.image} style={styles.recipeImage} resizeMode="cover" />
+              <TouchableOpacity
+                style={styles.favoriteButton}
+                onPress={() => toggleFavorite(item.id)}
+              >
+                <IconButton
+                  icon={favorites[item.id] ? 'heart' : 'heart-outline'}
+                  iconColor={favorites[item.id] ? '#e74c3c' : '#20515a'}
+                  size={20}
+                  style={{ margin: 0 }}
+                />
+              </TouchableOpacity>
+              <Text style={styles.recipeTitle}>{item.title}</Text>
+              <View style={styles.recipeInfoRow}>
+                <Text style={styles.recipeInfo}>🍽 {item.kcal} Kcal</Text>
+                <Text style={styles.recipeInfo}>⏱ {item.time}</Text>
+              </View>
             </View>
+          ))}
+        </View>
+        {/* Tips & Tricks */}
+        <Text style={[styles.sectionTitle, { marginBottom: 8 }]}>Tips & Tricks</Text>
+        <View style={[styles.tipsContainer, { marginBottom: 24 }]}>
+          <View style={styles.tipCard}>
+            <Text style={styles.tipTitle}>How to keep herbs fresh</Text>
+            <Text style={styles.tipDesc}>Wrap them in a damp paper towel and store in a ziplock bag in the fridge.</Text>
           </View>
-        ))}
-      </View>
-      {/* Add bottom padding for nav bar */}
-      <View style={{ height: 80 }} />
-    </ScrollView>
+          <View style={styles.tipCard}>
+            <Text style={styles.tipTitle}>Perfect boiled eggs</Text>
+            <Text style={styles.tipDesc}>Boil for 7 minutes for a creamy yolk, then cool in ice water.</Text>
+          </View>
+        </View>
+      </ScrollView>
+      <BottomTabBar />
+    </View>
   );
 }
 
@@ -200,6 +240,9 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     marginRight: 16,
     backgroundColor: '#abe1e5',
+    marginBottom: 0,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   featuredImage: {
     width: '100%',
@@ -270,6 +313,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderRadius: 18,
     width: width * 0.42,
+    minWidth: 140,
+    maxWidth: 180,
     marginBottom: 16,
     paddingBottom: 8,
     shadowColor: '#000',
@@ -277,7 +322,10 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.08,
     shadowRadius: 4,
     elevation: 2,
-    marginRight: 8,
+    marginRight: 0,
+    marginLeft: 0,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   recipeImage: {
     width: '100%',
@@ -310,6 +358,73 @@ const styles = StyleSheet.create({
   },
   recipeInfo: {
     color: '#20515a',
+    fontSize: 13,
+  },
+  banner: {
+    backgroundColor: '#abe1e5',
+    borderRadius: 18,
+    padding: 18,
+    marginTop: 18,
+    marginBottom: 10,
+    alignItems: 'center',
+  },
+  bannerText: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    color: '#20515a',
+  },
+  bannerSubText: {
+    fontSize: 15,
+    color: '#20515a',
+    marginTop: 4,
+  },
+  chefCard: {
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    padding: 10,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.06,
+    shadowRadius: 2,
+    width: 90,
+    height: 110,
+    marginBottom: 0,
+    justifyContent: 'center',
+  },
+  chefAvatar: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    marginBottom: 6,
+  },
+  chefName: {
+    fontSize: 13,
+    color: '#20515a',
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
+  tipsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 8,
+    marginBottom: 16,
+  },
+  tipCard: {
+    flex: 1,
+    backgroundColor: '#f3f7f8',
+    borderRadius: 14,
+    padding: 12,
+    marginRight: 8,
+  },
+  tipTitle: {
+    fontWeight: 'bold',
+    color: '#20515a',
+    marginBottom: 4,
+  },
+  tipDesc: {
+    color: '#1a2b3b',
     fontSize: 13,
   },
 }); 
