@@ -1,33 +1,13 @@
 import React from 'react';
-
+import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { IconButton } from 'react-native-paper';
-import BottomTabBar from '../components/BottomTabBar';
-import {  ScrollView, StyleSheet, Text, View } from 'react-native';
 
-type NotificationCardProps = {
+type Notification = {
+  id: number;
   title: string;
   message: string;
   time: string;
 };
-
-function NotificationCard({ title, message, time }: NotificationCardProps) {
-  return (
-    <View style={styles.card}>
-      <View style={styles.iconContainer}>
-        <MaterialCommunityIcons name="bell-outline" size={28} color="#22313F" />
-      </View>
-      <View style={{ flex: 1 }}>
-        <Text style={styles.cardTitle}>{title}</Text>
-        <Text style={styles.cardMessage}>{message}</Text>
-      </View>
-      <Text style={styles.cardTime}>{time}</Text>
-      
-    </View>
-    
-  );
-  
-}
 
 const notifications = {
   today: [
@@ -72,18 +52,33 @@ const notifications = {
       time: '22 April 2024',
     },
   ],
-  
 };
+
+type NotificationCardProps = {
+  title: string;
+  message: string;
+  time: string;
+};
+
+function NotificationCard({ title, message, time }: NotificationCardProps) {
+  return (
+    <View style={styles.card}>
+      <View style={styles.iconContainer}>
+        <MaterialCommunityIcons name="star-circle" size={28} color="#22313F" />
+      </View>
+      <View style={{ flex: 1 }}>
+        <Text style={styles.cardTitle}>{title}</Text>
+        <Text style={styles.cardMessage}>{message}</Text>
+      </View>
+      <Text style={styles.cardTime}>{time}</Text>
+    </View>
+  );
+}
 
 export default function NotificationsScreen() {
   return (
     <View style={styles.container}>
-      {/* Header */}
-      <View style={styles.headerRow}>
-        <MaterialCommunityIcons name="arrow-left" size={28} color="#22313F" style={{ opacity: 0 }} />
-        <Text style={styles.header}>Notifications</Text>
-        <View style={{ width: 28 }} /> {/* Placeholder for symmetry */}
-      </View>
+      <Text style={styles.header}>Notifications</Text>
       <ScrollView contentContainerStyle={{ paddingBottom: 24 }}>
         <Text style={styles.sectionTitle}>Today</Text>
         {notifications.today.map((n) => (
@@ -98,7 +93,6 @@ export default function NotificationsScreen() {
           <NotificationCard key={n.id} {...n} />
         ))}
       </ScrollView>
-      <BottomTabBar />
     </View>
   );
 }
@@ -107,21 +101,15 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
-    paddingTop: 40,
+    paddingTop: 50,
     paddingHorizontal: 18,
-  },
-  headerRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 10,
   },
   header: {
     fontSize: 22,
     fontWeight: 'bold',
     color: '#22313F',
     alignSelf: 'center',
-    marginBottom: 8,
+    marginBottom: 18,
   },
   sectionTitle: {
     fontSize: 16,
@@ -134,7 +122,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#8EC6D7',
-    borderRadius: 14,
+    borderRadius: 12,
     padding: 14,
     marginBottom: 10,
   },
